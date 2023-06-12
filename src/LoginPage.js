@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import './login-page.css'; 
+import { Link } from 'react-router-dom';
 const LoginPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -80,6 +81,8 @@ const LoginPage = () => {
             value={password}
             onChange={handlePasswordChange}
           />
+          <br></br>
+          <Link to="/signup">Dont have an account? Sign Up</Link>
         </div>
         <button type="submit">Login</button>
       </form>

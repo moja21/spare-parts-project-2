@@ -6,9 +6,14 @@ const MAX_CONVERSATION_LENGTH = 10; // Maximum number of messages to retain in t
 const ChatAI = () => {
   const [message, setMessage] = useState('');
   const [conversation, setConversation] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setIsLoading(true);
+    setErrorMessage(''); // Reset error message
 
     try {
       const mergedMessage = [
@@ -27,23 +32,33 @@ const ChatAI = () => {
         body: JSON.stringify({ message: mergedMessage }),
       });
 
+      if (!response.ok) {
+        throw new Error('Request failed');
+      }
+
       const data = await response.json();
 
-      // Update the conversation with the new response
-      setConversation((prevConversation) => {
-        const updatedConversation = [
-          ...prevConversation,
-          { role: 'User', content: message },
-          { role: 'AI Assistance', content: data.message },
-        ];
+      if (data.error) {
+        setErrorMessage(data.error); // Set error message if API response contains an error
+      } else {
+        // Update the conversation with the new response
+        setConversation((prevConversation) => {
+          const updatedConversation = [
+            ...prevConversation,
+            { role: 'User', content: message },
+            { role: 'AI Assistance', content: data.message },
+          ];
 
-        // Limit the conversation history to the maximum length
-        return updatedConversation.slice(-MAX_CONVERSATION_LENGTH);
-      });
+          return updatedConversation.slice(-MAX_CONVERSATION_LENGTH);
+        });
+      }
 
       setMessage('');
     } catch (error) {
       console.error('Error:', error);
+      setErrorMessage('An error occurred. Please try again.'); // Set generic error message for request failure
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -69,12 +84,14 @@ const ChatAI = () => {
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             placeholder="Enter a message"
+            disabled={isLoading}
           />
-          <button className="submit-button" type="submit">
-            Submit
+          <button className="submit-button" type="submit" disabled={isLoading}>
+            {isLoading ? 'Loading...' : 'Submit'}
           </button>
         </div>
       </form>
+      {errorMessage && <p className="error-message">{errorMessage}</p>} {/* Display error message if it exists */}
     </div>
   );
 };

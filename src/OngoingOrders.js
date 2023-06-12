@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import './ongoing.css';
 
 const OngoingOrders = () => {
   const [data, setData] = useState([]);
@@ -7,7 +8,7 @@ const OngoingOrders = () => {
   const [hasMore, setHasMore] = useState(true);
   const url = 'https://spare-parts-php.herokuapp.com/ongoing_orders.php';
 
-  const fetchData = async () => {
+  const fetchData = async (pageNumber) => {
     setIsLoading(true);
 
     try {
@@ -16,19 +17,23 @@ const OngoingOrders = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ page }),
+        body: JSON.stringify({ page: pageNumber }),
       });
 
       if (response.ok) {
         const responseData = await response.json();
-        const { total_orders, ongoing_orders } = responseData;
+        const { ongoing_orders, message } = responseData;
 
-        setData((prevData) => [...prevData, ...ongoing_orders]);
-        setHasMore(ongoing_orders.length > 0);
+        if (message === 'No ongoing orders found.') {
+          setData([]);
+          setHasMore(false);
+        } else {
+          setData(ongoing_orders);
+          setHasMore(true);
+        }
       }
     } catch (error) {
       console.error('Error fetching data:', error);
-      
     }
 
     setIsLoading(false);
@@ -39,8 +44,13 @@ const OngoingOrders = () => {
     setPage((prevPage) => prevPage + 1);
   };
 
+  const loadPreviousOrders = () => {
+    if (isLoading || page <= 1) return;
+    setPage((prevPage) => prevPage - 1);
+  };
+
   useEffect(() => {
-    fetchData();
+    fetchData(page);
   }, [page]);
 
   return (
@@ -68,11 +78,17 @@ const OngoingOrders = () => {
       )}
 
       {isLoading && <p>Loading more orders...</p>}
-      {!isLoading && !hasMore && <p>No more orders to load.</p>}
+      {!isLoading && !hasMore && (
+        <p>No more orders to load. You are on the last page.</p>
+      )}
 
-      <div className="LoadMoreButton">
+      <div className="PaginationButtons">
+        <button onClick={loadPreviousOrders} disabled={isLoading || page <= 1}>
+          Previous Page
+        </button>
+        <p>Page: {page}</p>
         <button onClick={loadMoreOrders} disabled={isLoading || !hasMore}>
-          {isLoading ? 'Loading...' : 'Load More Orders'}
+          Next Page
         </button>
       </div>
     </div>

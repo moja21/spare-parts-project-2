@@ -31,7 +31,7 @@ function App() {
            <Route path="/signup">
               <SignUp/>
             </Route>
-            <Route path="/login">
+            <Route path="/login" component={LoginPage}>
               <LoginPage/>
             </Route>
             <Route path="/ImageDetection">

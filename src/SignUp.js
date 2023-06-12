@@ -1,6 +1,8 @@
+
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import './login-page.css';
+import { wait } from '@testing-library/user-event/dist/utils';
 
 const SignUp = () => {
   const history = useHistory();
@@ -8,6 +10,7 @@ const SignUp = () => {
     username: '',
     email: '',
     password: '',
+    passwordConfirm: '', 
     phoneNumber: '',
   });
   const [responseMessage, setResponseMessage] = useState('');
@@ -42,16 +45,17 @@ const SignUp = () => {
         });
 
         const data = await response.json();
-
+        console.log(data)
         if (data.ok) {
-          // Registration successful
           setResponseMessage(data.message);
           setRegisteredUser(data);
-          history.push('/login');
+          
         } else {
-          // Registration failed
+          
           setResponseMessage(data.message);
           setRegisteredUser(null);
+          
+          history.push('/login');
         }
       } catch (error) {
         console.error('Error:', error);
@@ -69,7 +73,7 @@ const SignUp = () => {
     <div className="form-container">
       <form className="form" onSubmit={handleSubmit}>
         <h1>
-          <a href="/">
+          <a href="/signup">
             <span className="form-title">Create</span> an account
           </a>
         </h1>
