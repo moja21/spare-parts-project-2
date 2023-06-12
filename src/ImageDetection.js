@@ -40,7 +40,7 @@ const ImageDetection = () => {
   };
 
   return (
-    <div>
+    <div className='image-detection'>
       <h1>Image Detection</h1>
       <input type="file" onChange={handleImageUpload} />
       {selectedImage && <img src={selectedImage} alt="Selected" />}
